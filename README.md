@@ -26,9 +26,23 @@ echo "EPREL_API_URL=https://eprel.ec.europa.eu/api" > .env.local
 bun dev
 ```
 
-Once the server is running, you can access the health check endpoint in your browser:
+Once the server is running, you can access the health check endpoint in your browser: [http://localhost:3000/health](http://localhost:3000/health)
 
-[http://localhost:3000/health](http://localhost:3000/health)
+### Docker
+
+Build the Docker image:
+
+```bash
+docker build --pull -t eprel-api-proxy .
+```
+
+Run the container:
+
+```bash
+docker run -p 3000:3000 eprel-api-proxy
+```
+
+Once running, you can visit: [http://localhost:3000/health](http://localhost:3000/health)
 
 ## Scripts
 
