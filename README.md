@@ -6,16 +6,37 @@ Solution for server-side access and CORS restrictions when integrating EPREL int
 
 ## Environment Variables
 
-Create an `.env` file with the following variables:
+Create an `.env.local` file with the following variables:
 
 ```env
-EPREL_API_URL= # Base URL of the EPREL API
-API_KEY=       # Your EPREL API key
-CORS_ORIGIN=*  # Allowed CORS origin (default: "*")
+# Base URL of the EPREL API (required)
+EPREL_API_URL=https://eprel.ec.europa.eu/api
+# Your EPREL API key (optional)
+API_KEY=
+# Allowed CORS origin (default: "*")
+CORS_ORIGIN=*
 ```
+
+`API_KEY` is not needed to look up a product by registration number. If it is not set, the `X-Api-Key` header is not sent.
 
 > [!TIP]
 > You can obtain a public API key by submitting a request at: [https://eprel.ec.europa.eu/screen/requestpublicapikey](https://eprel.ec.europa.eu/screen/requestpublicapikey)
+
+> [!NOTE]
+> `CORS_ORIGIN` only stops other websites from calling the proxy from the browser. It does not block server-side requests, so anyone who knows the URL can use it.
+
+## Endpoints
+
+| Method | Path                           | Description                                              |
+| ------ | ------------------------------ | -------------------------------------------------------- |
+| `GET`  | `/health`                      | Health check                                             |
+| `GET`  | `/product/:registrationNumber` | Proxied to `{EPREL_API_URL}/product/:registrationNumber` |
+
+`registrationNumber` must be numeric. Any other path returns `404`.
+
+```bash
+curl http://localhost:3000/product/123456
+```
 
 ## Get started
 
@@ -36,10 +57,10 @@ Build the Docker image:
 docker build --pull -t eprel-api-proxy .
 ```
 
-Run the container:
+Run the container, passing your environment file:
 
 ```bash
-docker run -p 3000:3000 eprel-api-proxy
+docker run --env-file .env.local -p 3000:3000 eprel-api-proxy
 ```
 
 Once running, you can visit: [http://localhost:3000/health](http://localhost:3000/health)
