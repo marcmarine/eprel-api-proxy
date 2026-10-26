@@ -1,3 +1,9 @@
+const FORWARDED_HEADERS = [
+  'Content-Type',
+  'Content-Disposition',
+  'Cache-Control',
+]
+
 const server = Bun.serve({
   routes: {
     '/health': new Response('OK'),
@@ -33,11 +39,20 @@ const server = Bun.serve({
           }
         )
 
-        const data = await response.json()
-        return withCORS(Response.json(data, { status: response.status }))
+        // Pass the body through untouched (JSON, SVG, PNG...). Encoding and
+        // length headers are not copied because fetch already decompressed it.
+        const headers = new Headers()
+        for (const name of FORWARDED_HEADERS) {
+          const value = response.headers.get(name)
+          if (value) headers.set(name, value)
+        }
+
+        return withCORS(
+          new Response(response.body, { status: response.status, headers })
+        )
       } catch (error) {
         return withCORS(
-          Response.json({ message: (error as any).message }, { status: 500 })
+          Response.json({ message: (error as any).message }, { status: 502 })
         )
       }
     },
