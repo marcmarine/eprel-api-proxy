@@ -25,13 +25,11 @@ const server = Bun.serve({
       const { search } = new URL(request.url)
 
       try {
-        // Proxy request to EPREL API with API key authentication
+        // Proxy request to EPREL API, authenticating only if an API key is set
         const response = await fetch(
           `${Bun.env.EPREL_API_URL}/product/${registrationNumber}${search}`,
           {
-            headers: {
-              'X-Api-Key': Bun.env.API_KEY as string,
-            },
+            headers: Bun.env.API_KEY ? { 'X-Api-Key': Bun.env.API_KEY } : {},
           }
         )
 
